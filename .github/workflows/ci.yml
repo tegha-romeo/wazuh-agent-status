@@ -110,19 +110,29 @@ jobs:
 
       # -------------------------------------------------------------------------
       # Step 6: Build the project
-      # Verifies the code compiles successfully
-      # --verbose: Provides detailed output for debugging build issues
       # -------------------------------------------------------------------------
       - name: Build project
         run: cargo build --verbose
 
-      # -----------------------------------------------------------------------
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: server-build-artifacts
+          path: target/debug/
+          retention-days: 7
+
+      # -------------------------------------------------------------------------
       # Step 7: Run all tests
-      # Executes unit tests, integration tests, and doc tests
-      # --verbose: Shows test names and progress
-      # -----------------------------------------------------------------------
+      # -------------------------------------------------------------------------
       - name: Run tests
         run: cargo test --verbose
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v3
+        with:
+          name: server-test-results
+          path: target/test-results/
+          retention-days: 7
 
       # -----------------------------------------------------------------------
       # Step 8: Run security audit
@@ -228,31 +238,41 @@ jobs:
 
       # -------------------------------------------------------------------------
       # Step 8: Run tests
-      # -------------------------------------------------------------------------
-      - name: Run tests
-        run: cargo test --verbose
 
-      # -------------------------------------------------------------------------
-      # Step 9: Build Tauri frontend (Vite/TypeScript)
-      # Ensures the web UI builds correctly before Tauri integration
-      # -------------------------------------------------------------------------
-      - name: Install Node.js dependencies
-        run: |
-          cd src
-          npm ci
+    # -------------------------------------------------------------------------
+    # Step 9: Build Tauri frontend
+    # -------------------------------------------------------------------------
+    - name: Install Node.js dependencies
+      run: |
+        cd src
+        npm ci
 
-      - name: Build frontend
-        run: |
-          cd src
-          npm run build
+    - name: Build frontend
+      run: |
+        cd src
+        npm run build
+
+    - name: Build Tauri application
+      run: cargo build --verbose
+
+    - name: Upload client build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: client-tauri-build
+        path: target/debug/
+        retention-days: 7
+
+    - name: Upload frontend artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: client-frontend-dist
+        path: src/dist/
+        retention-days: 7
 
   # =============================================================================
   # Job 3: Security Audit - Production-ready security scanning
   # =============================================================================
-  # Scans Rust dependencies for known vulnerabilities
-  # Essential for production services as per security best practices
   security-audit:
-    name: Security Audit
     runs-on: ubuntu-latest
     strategy:
       matrix:
