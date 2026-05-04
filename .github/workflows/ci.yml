@@ -1,14 +1,3 @@
-# CI Pipeline for wazuh-agent-status Rust Components
-#
-# Purpose: Ensure code quality, readability, and correctness for all Rust code
-# Triggers: Every push and pull request to main/develop branches
-#
-# Security note: Uses minimal permissions (contents: read) at workflow level
-# Security note: All third-party actions are pinned to specific commit SHAs to prevent
-#              malicious updates and ensure reproducible builds
-# Performance note: Implements aggressive caching for Rust dependencies
-# Production-ready: Includes security auditing, frontend validation, and optimized caching
-
 name: Rust CI
 
 on:
